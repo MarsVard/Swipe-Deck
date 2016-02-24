@@ -1,6 +1,7 @@
 package com.daprlabs.cardstack;
 
 import android.animation.Animator;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -215,14 +216,28 @@ public class SwipeListener implements View.OnTouchListener {
         }
     }
 
-    private boolean cardBeyondLeftBorder() {
+    public boolean cardBeyondLeftBorder() {
         //check if cards middle is beyond the left quarter of the screen
-        return (card.getX() + (card.getWidth() / 2) < (parentWidth / 4.f));
+//        return (card.getX() + (card.getWidth() / 2) < (parent.getWidth() / 4.f));
+
+        float offset = (((card.getX() - paddingLeft) / (parentWidth * OPACITY_END)));
+        Log.i("SWIPELISTENER", "" + offset);
+        if(offset <= -1)
+            return true;
+        else
+            return false;
     }
 
-    private boolean cardBeyondRightBorder() {
+    public boolean cardBeyondRightBorder() {
         //check if card middle is beyond the right quarter of the screen
-        return (card.getX() + (card.getWidth() / 2) > ((parentWidth / 4.f) * 3));
+//        return (card.getX() + (card.getWidth() / 2) > ((parent.getWidth() / 4.f) * 3));
+
+        float offset = (((card.getX() - paddingLeft) / (parentWidth * OPACITY_END)));
+        Log.i("SWIPELISTENER", "" + offset);
+        if(offset >= 1)
+            return true;
+        else
+            return false;
     }
 
     private ViewPropertyAnimator resetCardPosition() {
