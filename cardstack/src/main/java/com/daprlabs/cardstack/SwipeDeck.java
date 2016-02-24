@@ -49,6 +49,10 @@ public class SwipeDeck extends FrameLayout {
     DataSetObserver observer;
     @State
     int nextAdapterCard = 0;
+
+    @State
+    int topCardAdapterIndex = 0;
+
     private boolean restoreInstanceState = false;
 
     private SwipeListener swipeListener;
@@ -202,6 +206,9 @@ public class SwipeDeck extends FrameLayout {
             child.setOnTouchListener(null);
             swipeListener = null;
             removeViewWaitForAnimation(child);
+
+            // keep track of current index
+            topCardAdapterIndex++;
         }
 
         //if there are no more children left after top card removal let the callback know
@@ -464,6 +471,10 @@ public class SwipeDeck extends FrameLayout {
 
     public void setRightImage(int imageResource) {
         rightImageResource = imageResource;
+    }
+
+    public int getCurrentItemIndex() {
+        return topCardAdapterIndex;
     }
 
     public interface SwipeEventCallback {
