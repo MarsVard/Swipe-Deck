@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.ImageView;
 
 import com.daprlabs.cardstack.SwipeDeck;
@@ -67,6 +66,11 @@ public class SwipeDeckActivity extends AppCompatActivity {
             @Override
             public void cardActionUp() {
                 Log.i(TAG, "cardActionUp");
+            }
+
+            @Override
+            public void cardMovedOffset(float offset) {
+                Log.i(TAG, "horizontal offset from center" + offset);
             }
 
         });

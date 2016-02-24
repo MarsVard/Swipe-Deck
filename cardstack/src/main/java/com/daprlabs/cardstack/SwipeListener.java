@@ -1,7 +1,6 @@
 package com.daprlabs.cardstack;
 
 import android.animation.Animator;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -120,13 +119,16 @@ public class SwipeListener implements View.OnTouchListener {
                 float rotation = ROTATION_DEGREES * 2.f * distobjectX / parentWidth;
                 card.setRotation(rotation);
 
+                float offset = (((posX - paddingLeft) / (parentWidth * OPACITY_END)));
+                // send horizontal offset tot callback
+                callback.cardMovedOffset(offset);
+
                 if (rightView != null && leftView != null){
                     //set alpha of left and right image
-                    float alpha = (((posX - paddingLeft) / (parentWidth * OPACITY_END)));
                     //float alpha = (((posX - paddingLeft) / parentWidth) * ALPHA_MAGNITUDE );
                     //Log.i("alpha: ", Float.toString(alpha));
-                    rightView.setAlpha(alpha);
-                    leftView.setAlpha(-alpha);
+                    rightView.setAlpha(offset);
+                    leftView.setAlpha(-offset);
                 }
 
                 break;
@@ -265,5 +267,6 @@ public class SwipeListener implements View.OnTouchListener {
         void cardOffScreen();
         void cardActionDown();
         void cardActionUp();
+        void cardMovedOffset(float offset);
     }
 }
