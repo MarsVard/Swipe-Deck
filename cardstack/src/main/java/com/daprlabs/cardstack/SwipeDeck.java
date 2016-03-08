@@ -47,11 +47,9 @@ public class SwipeDeck extends FrameLayout {
      */
     private Adapter mAdapter;
     DataSetObserver observer;
-    @State
-    int nextAdapterCard = 0;
 
     @State
-    int topCardAdapterIndex = 0;
+    int nextAdapterCard = 0;
 
     private boolean restoreInstanceState = false;
 
@@ -105,7 +103,7 @@ public class SwipeDeck extends FrameLayout {
     {
         //when persisting this piece of state need to roll it back by the child count
         //so those children get restored later instead of skipped over
-        nextAdapterCard = nextAdapterCard - getChildCount();
+        //nextAdapterCard = nextAdapterCard - getChildCount();
         return Icepick.saveInstanceState(this, super.onSaveInstanceState());
     }
 
@@ -206,9 +204,6 @@ public class SwipeDeck extends FrameLayout {
             child.setOnTouchListener(null);
             swipeListener = null;
             removeViewWaitForAnimation(child);
-
-            // keep track of current index
-            topCardAdapterIndex++;
         }
 
         //if there are no more children left after top card removal let the callback know
@@ -381,16 +376,14 @@ public class SwipeDeck extends FrameLayout {
             swipeListener = new SwipeListener(child, new SwipeListener.SwipeCallback() {
                 @Override
                 public void cardSwipedLeft() {
-                    int positionInAdapter = nextAdapterCard - getChildCount();
-                    if (eventCallback != null) eventCallback.cardSwipedLeft(positionInAdapter);
+                    if (eventCallback != null) eventCallback.cardSwipedLeft(getTopCardIndex());
                     removeTopCard();
                     addNextCard();
                 }
 
                 @Override
                 public void cardSwipedRight() {
-                    int positionInAdapter = nextAdapterCard - getChildCount();
-                    if (eventCallback != null) eventCallback.cardSwipedRight(positionInAdapter);
+                    if (eventCallback != null) eventCallback.cardSwipedRight(getTopCardIndex());
                     removeTopCard();
                     addNextCard();
                 }
@@ -428,6 +421,10 @@ public class SwipeDeck extends FrameLayout {
 
             child.setOnTouchListener(swipeListener);
         }
+    }
+
+    public int getTopCardIndex() {
+        return nextAdapterCard - getChildCount();
     }
 
     public void setEventCallback(SwipeEventCallback eventCallback) {
@@ -471,10 +468,6 @@ public class SwipeDeck extends FrameLayout {
 
     public void setRightImage(int imageResource) {
         rightImageResource = imageResource;
-    }
-
-    public int getCurrentItemIndex() {
-        return topCardAdapterIndex;
     }
 
     public interface SwipeEventCallback {
