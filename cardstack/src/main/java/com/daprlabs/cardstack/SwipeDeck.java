@@ -6,6 +6,7 @@ import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
@@ -16,9 +17,6 @@ import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 
-import icepick.Icepick;
-import icepick.State;
-
 /**
  * Created by aaron on 4/12/2015.
  */
@@ -26,6 +24,8 @@ public class SwipeDeck extends FrameLayout {
 
     private static final String TAG = "SwipeDeck.java";
     private static int NUMBER_OF_CARDS;
+    DataSetObserver observer;
+    int nextAdapterCard = 0;
     private float ROTATION_DEGREES;
     private float CARD_SPACING;
     private boolean RENDER_ABOVE;
@@ -34,28 +34,21 @@ public class SwipeDeck extends FrameLayout {
     private int CARD_GRAVITY;
     private int paddingLeft;
     private boolean hardwareAccelerationEnabled = false;
-
     private int paddingRight;
     private int paddingTop;
     private int paddingBottom;
-
     private SwipeEventCallback eventCallback;
     private CardPositionCallback cardPosCallback;
-
     /**
      * The adapter with all the data
      */
     private Adapter mAdapter;
-    DataSetObserver observer;
-
-    @State
-    int nextAdapterCard = 0;
-
     private boolean restoreInstanceState = false;
 
     private SwipeListener swipeListener;
     private int leftImageResource;
     private int rightImageResource;
+    private int AnimationTime = 160;
 
     public SwipeDeck(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -99,19 +92,26 @@ public class SwipeDeck extends FrameLayout {
 
     //state persistence
     @Override
-    public Parcelable onSaveInstanceState()
-    {
-        //when persisting this piece of state need to roll it back by the child count
-        //so those children get restored later instead of skipped over
-        //nextAdapterCard = nextAdapterCard - getChildCount();
-        return Icepick.saveInstanceState(this, super.onSaveInstanceState());
+    public Parcelable onSaveInstanceState() {
+        Bundle bundle = new Bundle();
+
+        bundle.putParcelable("instanceState", super.onSaveInstanceState());
+        bundle.putInt("nextAdapterCard", nextAdapterCard);
+
+        return bundle;
     }
 
     @Override
-    public void onRestoreInstanceState(Parcelable state)
-    {
+    public void onRestoreInstanceState(Parcelable state) {
         restoreInstanceState = true;
-        super.onRestoreInstanceState(Icepick.restoreInstanceState(this, state));
+
+        if (state instanceof Bundle) {
+            Bundle bundle = (Bundle) state;
+            nextAdapterCard = bundle.getInt("nextAdapterCard");
+            state = bundle.getParcelable("instanceState");
+        }
+
+        super.onRestoreInstanceState(state);
     }
 
     /**
@@ -129,7 +129,7 @@ public class SwipeDeck extends FrameLayout {
         }
         mAdapter = adapter;
         // if we're not restoring previous instance state
-        if(!restoreInstanceState)nextAdapterCard = 0;
+        if (!restoreInstanceState) nextAdapterCard = 0;
 
         observer = new DataSetObserver() {
             @Override
@@ -140,7 +140,7 @@ public class SwipeDeck extends FrameLayout {
                 //is less than the max number of cards to display) add the cards.
                 int childCount = getChildCount();
                 //only perform action if there are less cards on screen than NUMBER_OF_CARDS
-                if(childCount < NUMBER_OF_CARDS) {
+                if (childCount < NUMBER_OF_CARDS) {
                     for (int i = childCount; i < NUMBER_OF_CARDS; ++i) {
                         addNextCard();
                     }
@@ -164,7 +164,6 @@ public class SwipeDeck extends FrameLayout {
         removeAllViewsInLayout();
         requestLayout();
     }
-
 
     public void setSelection(int position) {
         throw new UnsupportedOperationException("Not supported");
@@ -243,7 +242,6 @@ public class SwipeDeck extends FrameLayout {
         setupTopCard();
     }
 
-
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setZTranslations() {
         //this is only needed to add shadows to cardviews on > lollipop
@@ -310,7 +308,7 @@ public class SwipeDeck extends FrameLayout {
 
         child.animate()
                 .setDuration(restoreInstanceState ? 0 : 160)
-        .y(paddingTop + offset);
+                .y(paddingTop + offset);
 
         restoreInstanceState = false;
     }
@@ -350,7 +348,6 @@ public class SwipeDeck extends FrameLayout {
         }
         setMeasuredDimension(width, height);
     }
-
 
     private void setupTopCard() {
 
@@ -394,17 +391,17 @@ public class SwipeDeck extends FrameLayout {
 
                 @Override
                 public void cardActionDown() {
-                    if(eventCallback!=null) eventCallback.cardActionDown();
+                    if (eventCallback != null) eventCallback.cardActionDown();
                 }
 
                 @Override
                 public void cardActionUp() {
-                    if(eventCallback!=null) eventCallback.cardActionUp();
+                    if (eventCallback != null) eventCallback.cardActionUp();
                 }
 
                 @Override
                 public void cardMovedOffset(float offset) {
-                    if(eventCallback!=null) eventCallback.cardMovedOffset(offset);
+                    if (eventCallback != null) eventCallback.cardMovedOffset(offset);
                 }
 
             }, initialX, initialY, ROTATION_DEGREES, OPACITY_END);
@@ -430,7 +427,6 @@ public class SwipeDeck extends FrameLayout {
     public void setEventCallback(SwipeEventCallback eventCallback) {
         this.eventCallback = eventCallback;
     }
-
 
     public void swipeTopCardLeft(int duration) {
 
@@ -487,10 +483,10 @@ public class SwipeDeck extends FrameLayout {
 
     public interface CardPositionCallback {
         void xPos(Float x);
+
         void yPos(Float y);
     }
 
-    private int AnimationTime = 160;
     private class RemoveViewOnAnimCompleted extends AsyncTask<View, Void, View> {
 
         @Override
