@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
@@ -204,7 +205,10 @@ public class SwipeDeck extends FrameLayout {
             swipeListener = null;
             removeViewWaitForAnimation(child);
         }
+    }
 
+    private void checkIfDepleted(){
+        Log.i(TAG, "checkIfDepleted");
         //if there are no more children left after top card removal let the callback know
         if (getChildCount() <= 0 && eventCallback != null) {
             eventCallback.cardsDepleted();
@@ -499,6 +503,7 @@ public class SwipeDeck extends FrameLayout {
         protected void onPostExecute(View view) {
             super.onPostExecute(view);
             removeView(view);
+            checkIfDepleted();
         }
     }
 }
